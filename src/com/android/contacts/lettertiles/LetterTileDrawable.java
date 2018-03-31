@@ -34,6 +34,8 @@ import com.android.contacts.R;
 
 import com.google.common.base.Preconditions;
 
+import org.chinese.pinyin.PinyinHelper;
+
 /**
  * A drawable that encapsulates all the functionality needed to display a letter tile to
  * represent a contact image.
@@ -167,6 +169,22 @@ public class LetterTileDrawable extends Drawable {
             canvas.drawText(sFirstChar, 0, 1, bounds.centerX(),
                     bounds.centerY() + mOffset * bounds.height() - sRect.exactCenterY(),
                     sPaint);
+        } else if (mLetter != null && PinyinHelper.matchesCheck(mLetter)) {
+            // Draw letter/digit only if the first character is a chinese letter
+            // Draw letter or digit.
+            sFirstChar[0] = mLetter;
+
+            // Scale text by canvas bounds and user selected scaling factor
+            sPaint.setTextSize(mScale * sLetterToTileRatio * minDimension * 0.8f);
+            //sPaint.setTextSize(sTileLetterFontSize);
+            sPaint.getTextBounds(sFirstChar, 0, 1, sRect);
+            sPaint.setColor(sTileFontColor);
+
+            // Draw the letter in the canvas, vertically shifted up or down by the user-defined
+            // offset
+            canvas.drawText(sFirstChar, 0, 1, bounds.centerX(),
+                    bounds.centerY() * 0.9f + mOffset * bounds.height() + sRect.height() / 2,
+                    sPaint);
         } else {
             // Draw the default image if there is no letter/digit to be drawn
             final Bitmap bitmap = getBitmapForContactType(mContactType);
@@ -267,7 +285,7 @@ public class LetterTileDrawable extends Drawable {
     public LetterTileDrawable setLetterAndColorFromContactDetails(final String displayName,
             final String identifier) {
         if (displayName != null && displayName.length() > 0
-                && isEnglishLetter(displayName.charAt(0))) {
+                && (isEnglishLetter(displayName.charAt(0)) || PinyinHelper.matchesCheck(displayName.charAt(0)))) {
             mLetter = Character.toUpperCase(displayName.charAt(0));
         }else{
             mLetter = null;

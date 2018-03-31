@@ -52,6 +52,7 @@ import android.widget.TextView;
 
 import com.android.contacts.R;
 import com.android.contacts.dialog.CallSubjectDialog;
+import com.sudamod.sdk.phonelocation.PhoneUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -631,7 +632,7 @@ public class ExpandingEntryCardView extends CardView {
             int iconVisibility) {
         final EntryView view = (EntryView) layoutInflater.inflate(
                 R.layout.expanding_entry_card_item, this, false);
-
+         Context context = getContext();
         view.setContextMenuInfo(entry.getEntryContextMenuInfo());
         if (!TextUtils.isEmpty(entry.getPrimaryContentDescription())) {
             view.setContentDescription(entry.getPrimaryContentDescription());
@@ -664,10 +665,15 @@ public class ExpandingEntryCardView extends CardView {
         }
 
         final TextView text = (TextView) view.findViewById(R.id.text);
+        CharSequence location = PhoneUtil.getPhoneUtil(getContext()).getLocalNumberInfo(entry.getHeader());
         if (!TextUtils.isEmpty(entry.getText())) {
-            text.setText(entry.getText());
+            text.setText(TextUtils.isEmpty(location) ? entry.getText() : entry.getText() + " " + location);
         } else {
-            text.setVisibility(View.GONE);
+            if (TextUtils.isEmpty(location)) {
+                text.setVisibility(View.GONE);
+            } else {
+                text.setText(location);
+            }
         }
 
         final ImageView textIcon = (ImageView) view.findViewById(R.id.icon_text);
